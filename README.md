@@ -22,6 +22,6 @@ $Subject = "Postfach Übersicht"
 - Exchange Server 2019
 - Windows Server 2022
 
-## Website
+## Visit my Blog for an example
 
- [FrankysWeb](https://www.frankysweb.de/)
+ [FrankysWeb](https://www.frankysweb.de/exchange-server-bericht-ueber-postfachgroesse-an-benutzer-senden/)
