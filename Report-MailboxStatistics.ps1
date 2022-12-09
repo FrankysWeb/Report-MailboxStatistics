@@ -14,7 +14,7 @@ foreach ($GroupMember in $GroupMembers) {
  $Displayname = $Stats.Displayname
  $MailboxSize = $Stats.Size
  $MailboxFolderStatistics = Get-MailboxFolderStatistics $mailbox | select FolderPath,FolderSize,ItemsInFolder
- $TopFoldersBySize = $MailboxFolderStatistics | Select-Object FolderPath,@{Name="Foldersize";Expression={$r=$_.FolderSize; [long]$a = ($r.Substring($r.IndexOf("(")+1,($r.Length - 2 - $r.IndexOf("("))) -replace " bytes","" -replace ",","") ; [math]::Round($a/1048576,2) } } | sort foldersize -Descending | select -first $CountTopFolder
+ $TopFoldersBySize = $MailboxFolderStatistics | Select-Object FolderPath,@{Name="Foldersize";Expression={ "{0:N2}" -f ((($_.FolderSize -replace "[0-9\.]+ [A-Z]* \(([0-9,]+) bytes\)","`$1") -replace ",","") / 1MB)}}  | sort foldersize -Descending | select -first $CountTopFolder
  $TopFoldersByItems = $MailboxFolderStatistics | sort ItemsInFolder -Descending | select -first $CountTopFolder
  
  $Statistic = [PSCustomObject]@{
