@@ -1,5 +1,6 @@
 $Group = "Domain Users"
 $CountTopFolder = 10
+$ReportMailboxSizeInMB = 5000
 
 $SMTPServer = "smtp.domain.tld"
 $From = "postfachbericht@domain.tld"
@@ -13,18 +14,20 @@ foreach ($GroupMember in $GroupMembers) {
  $Stats = $Mailbox | Get-MailboxStatistics | select displayname, @{label="Size"; expression={$_.TotalItemSize.Value.ToMB()}}
  $Displayname = $Stats.Displayname
  $MailboxSize = $Stats.Size
- $MailboxFolderStatistics = Get-MailboxFolderStatistics $mailbox | select FolderPath,FolderSize,ItemsInFolder
- $TopFoldersBySize = $MailboxFolderStatistics | Select-Object FolderPath,@{Name="Foldersize";Expression={$r=$_.FolderSize; [long]$a = ($r.Substring($r.IndexOf("(")+1,($r.Length - 2 - $r.IndexOf("("))) -replace " bytes","" -replace ",","") ; [math]::Round($a/1048576,2) } } | sort foldersize -Descending | select -first $CountTopFolder
- $TopFoldersByItems = $MailboxFolderStatistics | sort ItemsInFolder -Descending | select -first $CountTopFolder
+ if ($MailboxSize -ge $ReportMailboxSizeInMB) {
+  $MailboxFolderStatistics = Get-MailboxFolderStatistics $mailbox | select FolderPath,FolderSize,ItemsInFolder
+  $TopFoldersBySize = $MailboxFolderStatistics | Select-Object FolderPath,@{Name="Foldersize";Expression={ [long]$a = "{0:N2}" -f ((($_.FolderSize -replace "[0-9\.]+ [A-Z]* \(([0-9,]+) bytes\)","`$1") -replace ",","")); [math]::Round($a/1MB,2) }}  | sort foldersize -Descending | select -first $CountTopFolder
+  $TopFoldersByItems = $MailboxFolderStatistics | sort ItemsInFolder -Descending | select -first $CountTopFolder
  
- $Statistic = [PSCustomObject]@{
+  $Statistic = [PSCustomObject]@{
 	 DisplayName = $Displayname
 	 EMail = $EMail
 	 MailboxSize = $MailboxSize
 	 TopFoldersBySize = $TopFoldersBySize
 	 TopFoldersByItems = $TopFoldersByItems
 	}
- $MailboxStatistics.Add($Statistic) | out-null
+  $MailboxStatistics.Add($Statistic) | out-null
+ }
 }
 
 foreach ($MailboxStatistic in $MailboxStatistics) {
