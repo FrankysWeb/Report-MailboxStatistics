@@ -11,6 +11,7 @@ Change the first lines of the script :
 ```
 $Group = "Domain Users"
 $CountTopFolder = 10
+$ReportMailboxSizeInMB = 5000
 
 $SMTPServer = "smtp.domain.tld"
 $From = "postfachbericht@domain.tld"
