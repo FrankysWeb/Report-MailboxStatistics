@@ -18,6 +18,7 @@ foreach ($GroupMember in $GroupMembers) {
   $MailboxFolderStatistics = Get-MailboxFolderStatistics $mailbox | select FolderPath,FolderSize,ItemsInFolder
   $TopFoldersBySize = $MailboxFolderStatistics | Select-Object FolderPath,@{Name="Foldersize";Expression={ [long]$a = "{0:N2}" -f ((($_.FolderSize -replace "[0-9\.]+ [A-Z]* \(([0-9,]+) bytes\)","`$1") -replace ",","")); [math]::Round($a/1MB,2) }}  | sort foldersize -Descending | select -first $CountTopFolder
   $TopFoldersByItems = $MailboxFolderStatistics | sort ItemsInFolder -Descending | select -first $CountTopFolder
+  $MailboxFolderCount = $MailboxFolderStatistics.count
  
   $Statistic = [PSCustomObject]@{
 	 DisplayName = $Displayname
@@ -25,6 +26,7 @@ foreach ($GroupMember in $GroupMembers) {
 	 MailboxSize = $MailboxSize
 	 TopFoldersBySize = $TopFoldersBySize
 	 TopFoldersByItems = $TopFoldersByItems
+	 FolderCount = $MailboxFolderCount
 	}
   $MailboxStatistics.Add($Statistic) | out-null
  }
@@ -61,6 +63,11 @@ foreach ($MailboxStatistic in $MailboxStatistics) {
  $MailBody += $CountTopFolder
  $MailBody +=' Ordner mit den meisten Elementen:</p></div>'
  $MailBody += $TopFoldersByItems
+ 
+ $FolderCount = $MailboxStatistic.FolderCount
+ $MailBody += '<div><p>Ihr Postfach enthält '
+ $MailBody += $FolderCount
+ $MailBody +=' Ordner. Zuviele Ordner können Probleme verursachen.</p></div>'
  
  $MailBody += '<div><p>Hier finden Sie weitere Informationen: https://www.frankysweb.de</p></div>'
  $MailBody += '<div><p>Vielen Dank für Ihre Mithilfe</p></div>'
